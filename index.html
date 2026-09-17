@@ -260,35 +260,25 @@ async function supabaseRequest(path, options = {}){
   return text ? JSON.parse(text) : null;
 }
 
-// ---- Gallery Image Upload (ImgBB Free API) ----
-async function uploadImageToHosting(input){
+// ---- Gallery Image Upload (Local Base64 Conversion) ----
+function uploadImageToHosting(input){
   const file = input.files[0];
   if(!file) return;
   
   const statusEl = document.getElementById('upload-status');
-  statusEl.textContent = 'Image upload ho rahi hai...';
+  statusEl.textContent = 'Image load ho rahi hai...';
   
-  const formData = new FormData();
-  formData.append('image', file);
-
-  try {
-    // Free ImgBB API key use kar rahe hain image link banane ke liye
-    const res = await fetch('https://api.imgbb.com/1/upload?key=6d207e02193a847aa97d5d2d871799a4', {
-      method: 'POST',
-      body: formData
-    });
-    const data = await res.json();
-    if(data.success){
-      document.getElementById('c-image').value = data.data.url;
-      statusEl.textContent = 'Image successfully upload ho gayi!';
-    } else {
-      statusEl.textContent = 'Upload fail ho gaya, dobara try karein.';
-      statusEl.style.color = '#d94040';
-    }
-  } catch(e) {
-    statusEl.textContent = 'Error: ' + e.message;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    document.getElementById('c-image').value = e.target.result;
+    statusEl.textContent = 'Image successfully lag gayi!';
+    statusEl.style.color = '#0a7d3c';
+  };
+  reader.onerror = function() {
+    statusEl.textContent = 'Image load karne mein masla aya.';
     statusEl.style.color = '#d94040';
-  }
+  };
+  reader.readAsDataURL(file);
 }
 
 // ---- tabs ----
